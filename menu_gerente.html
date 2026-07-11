@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Cantor - Menu de Gerente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../CSS/menu_gerente.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="nav-title">Golden Cantor</span>
+        </div>
+        <div class="nav-user-info">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Rol: Gerente</span>
+        </div>
+    </header>
+
+    <main class="menu-container">
+        
+        <div class="menu-header">
+            <h1>PANEL DE GERENTE</h1>
+            <p>Selecciona una opción del sistema para empezar a gestionar</p>
+        </div>
+
+        <div class="menu-grid">
+            
+            <div class="menu-card" onclick="navegarA('crud_productos.html')">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Productos</h2>
+                    <p class="card-description">Altas, bajas, modificaciones y control de inventario de mercancía.</p>
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="navegarA('crud_personal.html')">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Personal</h2>
+                    <p class="card-description">Gestionar empleados, asignar credenciales y controlar roles de acceso.</p>
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="ejecutarCorte()">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Corte de Caja</h2>
+                    <p class="card-description">Arqueo de caja, balance de ingresos del día y cierre de turno.</p>
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="navegarA('caja.html')">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-cash-register"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Venta</h2>
+                    <p class="card-description">Abrir la interfaz de caja comercial regular para registrar ventas de mostrador.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="logout-wrapper">
+            <button class="btn-logout" onclick="navegarA('../HTML/iniciosesion.html')">
+                <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        function navegarA(pagina) {
+            window.location.href = pagina;
+        }
+
+        function ejecutarCorte() {
+            const confirmar = confirm("¿Estás seguro de que deseas iniciar el proceso de Corte de Caja actual?");
+            if (confirmar) {
+                alert("Generando balance financiero... Desplegando desglose de operaciones.");
+                window.location.href = '../HTML/corte_caja.html';
+            }
+        }
+    </script>
+</body>
+</html>

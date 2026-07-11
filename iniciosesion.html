@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Cantor - Iniciar Sesión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/iniciosesion.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo-wrapper">
+            <img src="../IMG/LogoGoldenCantor.png" alt="Golden Cantor Logo" class="logo-img">
+        </div>
+
+        <h1 class="brand-title">Golden Cantor</h1>
+        <p class="brand-slogan">Huele bien todo el día</p>
+
+        <h2 class="welcome-title">BIENVENIDO</h2>
+        <p class="subtitle">Inicia sesión</p>
+
+        <form id="form-login">
+            <div class="form-group">
+                <label class="form-label">Usuario:</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input type="text" class="form-input" id="usuario" name="usuario" placeholder="Usuario" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña:</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" class="form-input" id="contrasena" name="contrasena" placeholder="••••••••" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Iniciar sesión</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+
+            const usuario = document.getElementById('usuario').value;
+            const contrasena = document.getElementById('contrasena').value;
+
+            validarSesion(usuario, contrasena);
+        });
+
+        function validarSesion(usuario, contrasena) {
+            const user = usuario.trim().toLowerCase();
+            const contrasen = contrasena.trim(); 
+
+            // Corregido a '&&' para la evaluación lógica
+            if (user === 'gerente' && contrasen === "123") {
+                alert('Bienvenido, Gerente.');
+                window.location.href = 'menu_gerente.html'; 
+            } 
+            else if (user === 'vendedor' && contrasen === '123') {
+                alert('Bienvenido al módulo de Caja.');
+                window.location.href = 'caja.html'; 
+            } 
+            else {
+                alert('Usuario o contraseña incorrectos. Intente de nuevo.');
+            }
+        }
+    </script>
+</body>
+</html>

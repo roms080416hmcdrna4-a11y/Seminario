@@ -1,0 +1,143 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 150%;
+            max-width: 420px;
+            background-color: #0f0f12;
+            border: 1px solid #1a1a1f;
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo-wrapper {
+            margin-bottom: 25px;
+        }
+
+        .logo-img {
+            width: 110px;
+            height: 110px;
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 5px;
+            object-fit: cover;
+            border: 2px solid #ff4d4d; /* Sutil borde rojo como el de la imagen */
+        }
+
+        .brand-title {
+            color: #ff4d4d; /* Tono rojo vibrante */
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .brand-slogan {
+            color: #8c8c8c;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+
+        .welcome-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: #8c8c8c;
+            font-size: 0.95rem;
+            margin-bottom: 35px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: #8c8c8c;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background-color: #141417;
+            border: 1px solid #2d2d35;
+            color: #ffffff;
+            padding: 14px 15px 14px 45px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #ff4d4d;
+            background-color: #18181c;
+            box-shadow: 0 0 8px rgba(2ff, 77, 77, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: #4a4a52;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #ff4d4d;
+            color: #ffffff;
+            border: none;
+            padding: 15px;
+            border-radius: 25px; 
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #e63939;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }

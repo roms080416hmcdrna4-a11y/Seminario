@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Cantor - Personal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../CSS/crud_personal.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="nav-title">Golden Cantor - Personal</span>
+        </div>
+        <div class="nav-user-info">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Gerente de Tienda</span>
+        </div>
+    </header>
+
+    <main class="crud-container">
+        
+        <div class="card-panel">
+            <h2 class="panel-title" id="form-titulo"><i class="fa-solid fa-user-plus"></i> Registrar Nuevo Empleado</h2>
+            
+            <form id="form-personal">
+                <input type="hidden" id="edit-id" value="">
+
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">Nombre Completo</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user input-icon"></i>
+                            <input type="text" class="form-input" id="per-nombre" placeholder="Ej. Carlos Mendoza Torres" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rol / Puesto</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user-gear input-icon"></i>
+                            <select class="form-select" id="per-rol" style="padding-left: 40px;" required>
+                                <option value="Vendedor">Vendedor</option>
+                                <option value="Gerente">Gerente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre de Usuario (Login)</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-at input-icon"></i>
+                            <input type="text" class="form-input" id="per-usuario" placeholder="Ej. carlos_m" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña de Acceso</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" class="form-input" id="per-pass" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Estado Inicial</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-toggle-on input-icon"></i>
+                            <select class="form-select" id="per-estado" style="padding-left: 40px;" required>
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secundario" id="btn-cancelar-edicion" style="display: none;">
+                            <i class="fa-solid fa-ban"></i> Cancelar Edición
+                        </button>
+                        <button type="submit" class="btn btn-primario" id="btn-guardar">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Colaborador
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-panel">
+            <div class="table-header-tools">
+                <h2 class="panel-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
+                    <i class="fa-solid fa-users"></i> Lista de Personal
+                </h2>
+                
+                <div class="input-wrapper search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass input-icon"></i>
+                    <input type="text" class="form-input" id="input-buscar" placeholder="Buscar por nombre, usuario o rol...">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="crud-tabla">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Usuario</th>
+                            <th>Contraseña</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-personal-cuerpo">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 25px; display: flex; justify-content: flex-start;">
+                <button type="button" class="btn btn-secundario" id="btn-volver-menu">
+                    <i class="fa-solid fa-arrow-left"></i> Volver al Menú
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Base de datos local simulada de personal
+        let personal = [
+            { id: "1", nombre: "Administrador General", usuario: "admin", pass: "123", rol: "Gerente", estado: "Activo" },
+            { id: "2", nombre: "Sofía Galindo Ríos", usuario: "sofia_vta", pass: "123", rol: "Vendedor", estado: "Activo" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderizarPersonal(personal);
+        });
+
+        // Evento para Registrar / Modificar
+        document.getElementById('form-personal').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const editId = document.getElementById('edit-id').value;
+            const nombre = document.getElementById('per-nombre').value.trim();
+            const usuario = document.getElementById('per-usuario').value.trim();
+            const pass = document.getElementById('per-pass').value;
+            const rol = document.getElementById('per-rol').value;
+            const estado = document.getElementById('per-estado').value;
+
+            if (editId) {
+                // Modo Edición
+                personal = personal.map(p => p.id === editId ? { id: editId, nombre, usuario, pass, rol, estado } : p);
+                alert('¡Datos del empleado actualizados con éxito!');
+                cancelarEdicion();
+            } else {
+                // Modo Creación
+                const nuevo = {
+                    id: Date.now().toString(),
+                    nombre,
+                    usuario,
+                    pass,
+                    rol,
+                    estado
+                };
+                personal.push(nuevo);
+                alert('¡Nuevo colaborador registrado de manera exitosa!');
+            }
+
+            document.getElementById('form-personal').reset();
+            renderizarPersonal(personal);
+        });
+
+        // Función encargada de dibujar las filas en la tabla
+        function renderizarPersonal(lista) {
+            const cuerpo = document.getElementById('tabla-personal-cuerpo');
+            cuerpo.innerHTML = '';
+
+            if (lista.length === 0) {
+                cuerpo.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--texto-mutado);">No se encontraron colaboradores registrados</td></tr>`;
+                return;
+            }
+
+            lista.forEach(p => {
+                const fila = document.createElement('tr');
+                
+                // Determinar clases de los badges de estado
+                const claseBadge = p.estado === 'Activo' ? 'status-badge activo' : 'status-badge inactivo';
+                // Determinar icono del botón activar/desactivar
+                const iconoEstado = p.estado === 'Activo' ? 'fa-solid fa-user-slash' : 'fa-solid fa-user-check';
+                const tituloAccion = p.estado === 'Activo' ? 'Dar de Baja' : 'Activar Colaborador';
+                const claseAccionEstado = p.estado === 'Activo' ? 'btn-table btn-toggle-status' : 'btn-table btn-toggle-status active-action';
+
+                fila.innerHTML = `
+                    <td style="font-weight: 600;">${p.nombre}</td>
+                    <td style="color: var(--rojo-primario); font-family: monospace;">@${p.usuario}</td>
+                    <td>••••••••</td>
+                    <td>${p.rol}</td>
+                    <td><span class="${claseBadge}">${p.estado}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-table btn-edit" onclick="cargarEdicion('${p.id}')" title="Editar"><i class="fa-solid fa-user-pen"></i></button>
+                            <button class="${claseAccionEstado}" onclick="cambiarEstado('${p.id}')" title="${tituloAccion}"><i class="${iconoEstado}"></i></button>
+                        </div>
+                    </td>
+                `;
+                cuerpo.appendChild(fila);
+            });
+        }
+
+        // Carga los datos para edición
+        function cargarEdicion(id) {
+            const p = personal.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('per-nombre').value = p.nombre;
+            document.getElementById('per-usuario').value = p.usuario;
+            document.getElementById('per-pass').value = p.pass;
+            document.getElementById('per-rol').value = p.rol;
+            document.getElementById('per-estado').value = p.estado;
+
+            // Ajustes visuales de interfaz
+            document.getElementById('form-titulo').innerHTML = `<i class="fa-solid fa-user-pen"></i> Modificando Ficha de: ${p.usuario}`;
+            document.getElementById('btn-guardar').innerHTML = `<i class="fa-solid fa-user-check"></i> Aplicar Modificación`;
+            document.getElementById('btn-cancelar-edicion').style.display = 'inline-flex';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Sale del modo edición
+        function cancelarEdicion() {
+            document.getElementById('form-personal').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-titulo').innerHTML = `<i class="fa-solid fa-user-plus"></i> Registrar Nuevo Empleado`;
+            document.getElementById('btn-guardar').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Guardar Colaborador`;
+            document.getElementById('btn-cancelar-edicion').style.display = 'none';
+        }
+
+        document.getElementById('btn-cancelar-edicion').addEventListener('click', cancelarEdicion);
+
+        // Cambia de estado (Activo <-> Inactivo) en lugar de un borrado rudo, óptimo para auditorías comerciales
+        function cambiarEstado(id) {
+            const p = personal.find(item => item.id === id);
+            if (!p) return;
+
+            const nuevoEstado = p.estado === 'Activo' ? 'Inactivo' : 'Activo';
+            if (confirm(`¿Deseas cambiar el estado de ${p.nombre} a [${nuevoEstado}]?`)) {
+                p.estado = nuevoEstado;
+                renderizarPersonal(personal);
+            }
+        }
+
+        // Buscador interactivo multitarget
+        document.getElementById('input-buscar').addEventListener('input', (e) => {
+            const texto = e.target.value.toLowerCase().trim();
+            const filtrados = personal.filter(p => 
+                p.nombre.toLowerCase().includes(texto) || 
+                p.usuario.toLowerCase().includes(texto) ||
+                p.rol.toLowerCase().includes(texto)
+            );
+            renderizarPersonal(filtrados);
+        });
+
+        // Regresar al panel del gerente
+        document.getElementById('btn-volver-menu').addEventListener('click', () => {
+            window.location.href = 'menu_gerente.html';
+        });
+    </script>
+</body>
+</html>

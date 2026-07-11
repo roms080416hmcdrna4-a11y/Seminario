@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Cantor - Corte de Caja</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../CSS/corte_caja.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="nav-title">Golden Cantor</span>
+        </div>
+        <div class="nav-user-info">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Gerente / Administrador</span>
+        </div>
+    </header>
+
+    <main class="main-layout">
+        
+        <div class="panel-izquierdo">
+            
+            <div class="card-panel">
+                <h2 class="panel-title"><i class="fa-solid fa-cash-register"></i> Arqueo Físico de Efectivo</h2>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Cierre</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-calendar-day input-icon"></i>
+                            <input type="date" class="form-input" id="corte-fecha" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Efectivo Físico Real en Caja ($)</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-money-bill-wave input-icon" style="color: var(--verde-exito);"></i>
+                            <input type="number" class="form-input" id="input-efectivo-real" placeholder="Ingresa el dinero contado" min="0" value="0" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel" style="flex: 1;">
+                <h2 class="panel-title"><i class="fa-solid fa-history"></i> Flujo de Caja (Turno Actual)</h2>
+                <div class="table-container">
+                    <table class="corte-tabla">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Concepto / Tipo</th>
+                                <th>Usuario</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>09:00 AM</td>
+                                <td>Fondo Inicial de Caja</td>
+                                <td>Sistema</td>
+                                <td class="badge-entrada">+$1,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>11:15 AM</td>
+                                <td>Venta Mostrador #1002</td>
+                                <td>Vendedor_01</td>
+                                <td class="badge-entrada">+$250.00</td>
+                            </tr>
+                            <tr>
+                                <td>01:30 PM</td>
+                                <td>Venta Mostrador #1003</td>
+                                <td>Vendedor_01</td>
+                                <td class="badge-entrada">+$300.00</td>
+                            </tr>
+                            <tr>
+                                <td>03:00 PM</td>
+                                <td>Pago de flete / Salida de Efectivo</td>
+                                <td>Gerente</td>
+                                <td class="badge-salida">-$150.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="panel-derecho">
+            <div>
+                <h2 class="panel-title"><i class="fa-solid fa-calculator"></i> Balance General</h2>
+                
+                <div class="resumen-valores">
+                    <div class="resumen-item">
+                        <span>(+) Fondo Fijo Inicial</span>
+                        <strong>$1,000.00</strong>
+                    </div>
+                    <div class="resumen-item">
+                        <span>(+) Ventas Totales</span>
+                        <strong>$550.00</strong>
+                    </div>
+                    <div class="resumen-item">
+                        <span>(-) Salidas de Efectivo</span>
+                        <strong>$150.00</strong>
+                    </div>
+                    
+                    <div class="resumen-item total-destacado">
+                        <span>Efectivo Esperado en Caja:</span>
+                        <strong id="val-esperado">$1,400.00</strong>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span>Efectivo Real Contado:</span>
+                        <strong id="val-real">$0.00</strong>
+                    </div>
+
+                    <div class="resumen-item diferencia-panel">
+                        <span>DIFERENCIA:</span>
+                        <span id="val-diferencia" class="estado-neutral">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-vertical">
+                <button type="button" class="btn btn-cierre" id="btn-guardar-corte">
+                    <i class="fa-solid fa-lock"></i> Guardar y Cerrar Caja
+                </button>
+                <button type="button" class="btn btn-secundario" id="btn-imprimir">
+                    <i class="fa-solid fa-print"></i> Imprimir Reporte
+                </button>
+                <button type="button" class="btn btn-secundario" id="btn-regresar" style="color: var(--texto-mutado);">
+                    <i class="fa-solid fa-arrow-left"></i> Volver al Menú
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Monto fijo esperado según los movimientos de la tabla de auditoría ($1000 + $250 + $300 - $150)
+        const EFECTIVO_ESPERADO = 1400.00;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Asignar fecha de hoy automáticamente
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('corte-fecha').value = hoy;
+            
+            // Inicializar cálculos
+            calcularDiferencia(0);
+        });
+
+        // Escuchar cuando el usuario ingresa dinero contado en el input
+        document.getElementById('input-efectivo-real').addEventListener('input', (e) => {
+            const valorIngresado = parseFloat(e.target.value) || 0;
+            calcularDiferencia(valorIngresado);
+        });
+
+        // Función matemática para evaluar faltantes o sobrantes
+        function calcularDiferencia(valorReal) {
+            const diferencia = valorReal - EFECTIVO_ESPERADO;
+            
+            // Actualizar etiquetas en el panel derecho
+            document.getElementById('val-real').innerText = `$${valorReal.toFixed(2)}`;
+            
+            const elementoDiferencia = document.getElementById('val-diferencia');
+            elementoDiferencia.innerText = `$${diferencia.toFixed(2)}`;
+
+            // Cambiar colores dinámicamente según el estado del balance
+            if (diferencia === 0) {
+                elementoDiferencia.className = "estado-exito"; // Caja cuadra perfectamente
+            } else if (diferencia < 0) {
+                elementoDiferencia.className = "estado-alerta"; // Faltante (Rojo)
+            } else {
+                elementoDiferencia.className = "estado-exito"; // Sobrante (Verde)
+                elementoDiferencia.innerText = `+$${diferencia.toFixed(2)}`;
+            }
+        }
+
+        // Navegación de regreso
+        document.getElementById('btn-regresar').addEventListener('click', () => {
+            window.location.href = 'menu_gerente.html'; // Nombre de tu archivo de menú anterior
+        });
+
+        // Acción de guardar
+        document.getElementById('btn-guardar-corte').addEventListener('click', () => {
+            const valorReal = parseFloat(document.getElementById('input-efectivo-real').value) || 0;
+            const dif = valorReal - EFECTIVO_ESPERADO;
+            
+            let mensaje = `Corte de caja guardado exitosamente.\nEfectivo Esperado: $${EFECTIVO_ESPERADO.toFixed(2)}\nEfectivo Real: $${valorReal.toFixed(2)}\n`;
+            
+            if(dif < 0) {
+                mensaje += `Atención: Se registró un faltante de $${Math.abs(dif).toFixed(2)}`;
+            } else if (dif > 0) {
+                mensaje += `Nota: Se registró un sobrante de $${dif.toFixed(2)}`;
+            } else {
+                mensaje += `¡Excelente! La caja cuadró perfectamente.`;
+            }
+
+            alert(mensaje);
+            window.location.href = 'menu_gerente.html';
+        });
+
+        document.getElementById('btn-imprimir').addEventListener('click', () => {
+            alert('Enviando reporte de auditoría a la ticketera...');
+        });
+    </script>
+</body>
+</html>

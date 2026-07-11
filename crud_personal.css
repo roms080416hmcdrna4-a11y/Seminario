@@ -1,0 +1,301 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        :root {
+            --bg-principal: #111217;
+            --bg-panel: #1a1c23;
+            --bg-input: #252833;
+            --rojo-primario: #e63946;
+            --rojo-hover: #bd2f3b;
+            --texto-blanco: #ffffff;
+            --texto-mutado: #9fa4b4;
+            --borde: #2d313f;
+            --verde-exito: #2a9d8f;
+            --azul-info: #4361ee;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-blanco);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra de Navegación Superior */
+        .navbar {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--borde);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-logo {
+            font-size: 1.8rem;
+            color: var(--rojo-primario);
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-input);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid var(--borde);
+        }
+
+        .nav-user-info i {
+            color: var(--rojo-primario);
+        }
+
+        /* Contenedor del CRUD */
+        .crud-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .card-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--borde);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--borde);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Grid del Formulario */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--texto-mutado);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: var(--texto-mutado);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--borde);
+            color: var(--texto-blanco);
+            padding: 12px 15px 12px 40px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--rojo-primario);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+        }
+
+        /* Botones del Formulario */
+        .form-actions {
+            grid-column: span 3;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primario {
+            background-color: var(--rojo-primario);
+            color: var(--texto-blanco);
+        }
+
+        .btn-primario:hover {
+            background-color: var(--rojo-hover);
+        }
+
+        .btn-secundario {
+            background-color: var(--bg-input);
+            color: var(--texto-mutado);
+            border: 1px solid var(--borde);
+        }
+
+        .btn-secundario:hover {
+            background-color: var(--borde);
+            color: var(--texto-blanco);
+        }
+
+        /* Herramientas de tabla */
+        .table-header-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .search-wrapper {
+            max-width: 350px;
+            width: 100%;
+        }
+
+        /* Tabla */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .crud-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .crud-tabla th {
+            background-color: var(--bg-input);
+            color: var(--texto-mutado);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 14px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--borde);
+        }
+
+        .crud-tabla td {
+            padding: 14px;
+            border-bottom: 1px solid var(--borde);
+            font-size: 0.95rem;
+        }
+
+        .crud-tabla tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Badges de Estado */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.activo {
+            background-color: rgba(42, 157, 143, 0.15);
+            color: var(--verde-exito);
+        }
+
+        .status-badge.inactivo {
+            background-color: rgba(230, 57, 70, 0.15);
+            color: var(--rojo-primario);
+        }
+
+        /* Acciones */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-table {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .btn-table:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-edit { color: var(--azul-info); }
+        .btn-toggle-status { color: var(--texto-mutado); }
+        .btn-toggle-status.active-action { color: var(--verde-exito); }
+
+        /* Responsivo */
+        @media (max-width: 900px) {
+            .form-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-actions { grid-column: span 2; }
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-actions { grid-column: span 1; flex-direction: column; }
+            .table-header-tools { flex-direction: column; align-items: stretch; }
+            .search-wrapper { max-width: 100%; }
+            .btn { width: 100%; justify-content: center; }
+        }

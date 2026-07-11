@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Cantor - Sistema de Caja</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../CSS/caja.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="nav-title">Golden Cantor</span>
+        </div>
+        <div class="nav-user-info">
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="txt-personal">Personal: Vendedor</span>
+        </div>
+    </header>
+
+    <main class="main-layout">
+        
+        <div class="panel-izquierdo">
+            
+            <div class="card-panel">
+                <h2 class="panel-title"><i class="fa-solid fa-cart-plus"></i> Registrar Artículo</h2>
+                <form id="form-caja" class="form-inline">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Producto / ID</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-barcode input-icon"></i>
+                            <input type="text" class="form-input" id="input-producto" placeholder="Escribe ID o nombre..." required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Cantidad</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-layer-group input-icon"></i>
+                            <input type="number" class="form-input" id="input-cantidad" min="1" value="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <button type="submit" class="btn btn-secundario" style="padding: 12px;"><i class="fa-solid fa-plus"></i> Añadir</button>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="card-panel" style="flex: 1;">
+                <h2 class="panel-title"><i class="fa-solid fa-list-check"></i> Lista de Venta Actual</h2>
+                <div class="table-container">
+                    <table class="productos-tabla">
+                        <thead>
+                            <tr>
+                                <th>Código/Nombre</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Subtotal</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-cuerpo">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="panel-derecho">
+            <div>
+                <h2 class="panel-title"><i class="fa-solid fa-receipt"></i> Resumen de Cuenta</h2>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    <label class="form-label">Fecha de Operación</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-calendar-days input-icon"></i>
+                        <input type="date" class="form-input" id="input-fecha" required>
+                    </div>
+                </div>
+
+                <div class="resumen-valores">
+                    <div class="resumen-item">
+                        <span>Subtotal bruto</span>
+                        <span id="txt-subtotal">$0.00</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span>Impuestos (IVA)</span>
+                        <span id="txt-iva">$0.00</span>
+                    </div>
+                    <div class="resumen-item total">
+                        <span>TOTAL:</span>
+                        <span class="total-precio" id="txt-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-vertical">
+                <button type="button" class="btn btn-cobrar" id="btn-finalizar">
+                    <i class="fa-solid fa-credit-card"></i> Finalizar Compra
+                </button>
+                <button type="button" class="btn btn-secundario" id="btn-envio">
+                    <i class="fa-solid fa-truck-fast"></i> Solicitar Envío
+                </button>
+                <button type="button" class="btn btn-secundario" id="btn-regresar" style="color: var(--texto-mutado);">
+                    <i class="fa-solid fa-arrow-left"></i> Salir / Regresar
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let carrito = [];
+        const PRECIO_BASE_SIMULADO = 300.00; 
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('input-fecha').value = hoy;
+            
+            renderizarTabla();
+        });
+
+        document.getElementById('form-caja').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nombreProducto = document.getElementById('input-producto').value.trim();
+            const cantidadProducto = parseInt(document.getElementById('input-cantidad').value);
+
+            if (nombreProducto === "" || cantidadProducto <= 0) return;
+
+ 
+            const nuevoItem = {
+                id: Date.now(), 
+                nombre: nombreProducto,
+                cantidad: cantidadProducto,
+                precioUnitario: PRECIO_BASE_SIMULADO,
+                subtotal: cantidadProducto * PRECIO_BASE_SIMULADO
+            };
+
+            carrito.push(nuevoItem);
+
+            // Limpiamos los inputs del formulario para el siguiente registro
+            document.getElementById('input-producto').value = '';
+            document.getElementById('input-cantidad').value = '1';
+
+            // Actualizamos la interfaz
+            renderizarTabla();
+        });
+
+        // Función encargada de dibujar las filas en la tabla y actualizar importes
+        function renderizarTabla() {
+            const tablaCuerpo = document.getElementById('tabla-cuerpo');
+            tablaCuerpo.innerHTML = ''; // Limpiamos la tabla antigua
+
+            let cuentaSubtotal = 0;
+
+            if (carrito.length === 0) {
+                tablaCuerpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--texto-mutado);">No hay productos en la venta actual</td></tr>`;
+            } else {
+                carrito.forEach(item => {
+                    cuentaSubtotal += item.subtotal;
+
+                    // Creamos la estructura HTML de la fila
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${item.nombre}</td>
+                        <td>${item.cantidad}</td>
+                        <td>$${item.precioUnitario.toFixed(2)}</td>
+                        <td>$${item.subtotal.toFixed(2)}</td>
+                        <td>
+                            <button class="btn-delete" onclick="eliminarProducto(${item.id})">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tablaCuerpo.appendChild(fila);
+                });
+            }
+
+            // Cálculos finales comerciales
+            const totalFinal = cuentaSubtotal;
+
+            // Pintar los valores actualizados en el panel derecho
+            document.getElementById('txt-subtotal').innerText = `$${cuentaSubtotal.toFixed(2)}`;
+            document.getElementById('txt-total').innerText = `$${totalFinal.toFixed(2)}`;
+        }
+
+        // Función para remover un producto si el vendedor se equivoca
+        function eliminarProducto(id) {
+            carrito = carrito.filter(item => item.id !== id);
+            renderizarTabla();
+        }
+
+        // Botón de salida / regresar
+        document.getElementById('btn-regresar').addEventListener('click', () => {
+            window.location.href = '../HTML/iniciosesion.html'; 
+        });
+    document.getElementById('btn-envio').addEventListener('click', () => {
+            window.location.href = '../HTML/envio.html'; 
+        });
+        // Botón finalizar compra
+        document.getElementById('btn-finalizar').addEventListener('click', () => {
+            if (carrito.length === 0) {
+                alert('La tabla está vacía. Añade productos antes de cobrar.');
+                return;
+            }
+            alert('¡Venta procesada con éxito! La cuenta ha sido cerrada.');
+            carrito = []; // Limpiamos la caja para la siguiente venta
+            renderizarTabla();
+        });
+    </script>
+</body>
+</html>
