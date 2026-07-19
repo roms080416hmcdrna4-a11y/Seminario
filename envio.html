@@ -118,33 +118,63 @@
     </main>
 
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            // Calculamos automáticamente la fecha estimada (por defecto, 3 días después de hoy)
-            const fechaActual = new Date();
-            fechaActual.setDate(fechaActual.getDate() + 3);
-            
-            const fechaEstimada = fechaActual.toISOString().split('T')[0];
-            document.getElementById('envio-fecha-entrega').value = fechaEstimada;
-        });
+let datosDeCaja = null;
+let empleadoSesion = { nombre: "Vendedor Envíos" };
 
-        // Acción al cancelar o regresar
-        document.getElementById('btn-cancelar').addEventListener('click', () => {
-            // Te regresa a la pantalla de caja de manera intuitiva
-            window.location.href = '../HTML/caja.html'; 
-        });
+window.addEventListener('DOMContentLoaded', () => {
+    const sesion = sessionStorage.getItem('usuario_activo');
+    if (sesion) empleadoSesion = JSON.parse(sesion);
 
-        // Acción al procesar el formulario de envío
-        document.getElementById('form-envio').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const nombre = document.getElementById('envio-nombre').value;
-            const telefono = document.getElementById('envio-telefono').value;
-            
-            alert(`¡Orden de Envío Registrada con Éxito!\n\nDestinatario: ${nombre}\nTeléfono: ${telefono}\nSe ha generado la orden de logística correctamente.`);
-            
-            // Una vez exitoso, limpia y regresa a la caja principal
+    const temporal = sessionStorage.getItem('carrito_envio');
+    if (!temporal) {
+        alert("No hay productos pendientes. Regresando...");
+        window.location.href = 'caja.html';
+        return;
+    }
+    datosDeCaja = JSON.parse(temporal);
+
+    const f = new Date();
+    f.setDate(f.getDate() + 3);
+    document.getElementById('envio-fecha-entrega').value = f.toISOString().split('T')[0];
+});
+
+document.getElementById('form-envio').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const payload = {
+        nombre: document.getElementById('envio-nombre').value.trim(),
+        telefono: document.getElementById('envio-telefono').value.trim(),
+        correo: document.getElementById('envio-correo').value.trim(),
+        calle: document.getElementById('envio-calle').value.trim(),
+        colonia: document.getElementById('envio-colonia').value.trim(),
+        cp: document.getElementById('envio-cp').value.trim(),
+        metodo: document.getElementById('envio-metodo').value,
+        fecha_entrega: document.getElementById('envio-fecha-entrega').value,
+        notas: document.getElementById('envio-notas').value.trim(),
+        productos: datosDeCaja.productos,
+        total: datosDeCaja.total,
+        vendedor: empleadoSesion.nombre
+    };
+
+    fetch('../PHP/api_envio.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.status === 'success') {
+            sessionStorage.removeItem('carrito_envio');
             window.location.href = 'caja.html';
-        });
+        }
+    });
+});
+
+document.getElementById('btn-cancelar').addEventListener('click', () => {
+    sessionStorage.removeItem('carrito_envio');
+    window.location.href = 'caja.html';
+});
     </script>
 </body>
 </html>

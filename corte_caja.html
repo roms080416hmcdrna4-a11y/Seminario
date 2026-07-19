@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Cantor - Corte de Caja</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../CSS/corte_caja.css">
@@ -16,7 +18,7 @@
         </div>
         <div class="nav-user-info">
             <i class="fa-solid fa-user-shield"></i>
-            <span>Gerente / Administrador</span>
+            <span id="txt-personal">Gerente / Administrador</span>
         </div>
     </header>
 
@@ -31,14 +33,14 @@
                         <label class="form-label">Fecha de Cierre</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-calendar-day input-icon"></i>
-                            <input type="date" class="form-input" id="corte-fecha" readonly>
+                            <input type="date" class="form-input" id="input-fecha">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Efectivo Físico Real en Caja ($)</label>
                         <div class="input-wrapper">
-                            <i class="fa-solid fa-money-bill-wave input-icon" style="color: var(--verde-exito);"></i>
-                            <input type="number" class="form-input" id="input-efectivo-real" placeholder="Ingresa el dinero contado" min="0" value="0" step="0.01">
+                            <i class="fa-solid fa-money-bill-wave input-icon" style="color: green;"></i>
+                            <input type="number" class="form-input" id="input-efectivo" placeholder="Ingresa el dinero contado" min="0" value="0" step="0.01">
                         </div>
                     </div>
                 </div>
@@ -47,40 +49,17 @@
             <div class="card-panel" style="flex: 1;">
                 <h2 class="panel-title"><i class="fa-solid fa-history"></i> Flujo de Caja (Turno Actual)</h2>
                 <div class="table-container">
-                    <table class="corte-tabla">
+                    <table class="corte-tabla" id="operaciones">
                         <thead>
                             <tr>
                                 <th>Hora</th>
-                                <th>Concepto / Tipo</th>
+                                <th>Concepto</th>
                                 <th>Usuario</th>
+                                <th>Tipo</th>
                                 <th>Monto</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>09:00 AM</td>
-                                <td>Fondo Inicial de Caja</td>
-                                <td>Sistema</td>
-                                <td class="badge-entrada">+$1,000.00</td>
-                            </tr>
-                            <tr>
-                                <td>11:15 AM</td>
-                                <td>Venta Mostrador #1002</td>
-                                <td>Vendedor_01</td>
-                                <td class="badge-entrada">+$250.00</td>
-                            </tr>
-                            <tr>
-                                <td>01:30 PM</td>
-                                <td>Venta Mostrador #1003</td>
-                                <td>Vendedor_01</td>
-                                <td class="badge-entrada">+$300.00</td>
-                            </tr>
-                            <tr>
-                                <td>03:00 PM</td>
-                                <td>Pago de flete / Salida de Efectivo</td>
-                                <td>Gerente</td>
-                                <td class="badge-salida">-$150.00</td>
-                            </tr>
+                        <tbody id="tabla-cuerpo">
                         </tbody>
                     </table>
                 </div>
@@ -94,21 +73,17 @@
                 
                 <div class="resumen-valores">
                     <div class="resumen-item">
-                        <span>(+) Fondo Fijo Inicial</span>
-                        <strong>$1,000.00</strong>
+                        <span>(+) Ingresos Totales (Ventas y Envíos)</span>
+                        <strong id="txt-ingresos">$0.00</strong>
                     </div>
                     <div class="resumen-item">
-                        <span>(+) Ventas Totales</span>
-                        <strong>$550.00</strong>
-                    </div>
-                    <div class="resumen-item">
-                        <span>(-) Salidas de Efectivo</span>
-                        <strong>$150.00</strong>
+                        <span>(-) Egresos / Salidas</span>
+                        <strong id="txt-egresos">$0.00</strong>
                     </div>
                     
                     <div class="resumen-item total-destacado">
-                        <span>Efectivo Esperado en Caja:</span>
-                        <strong id="val-esperado">$1,400.00</strong>
+                        <span>Efectivo Esperado en Sistema:</span>
+                        <strong id="txt-sistema">$0.00</strong>
                     </div>
 
                     <div class="resumen-item">
@@ -118,19 +93,19 @@
 
                     <div class="resumen-item diferencia-panel">
                         <span>DIFERENCIA:</span>
-                        <span id="val-diferencia" class="estado-neutral">$0.00</span>
+                        <strong id="txt-diferencia">$0.00</strong>
                     </div>
                 </div>
             </div>
 
             <div class="actions-vertical">
                 <button type="button" class="btn btn-cierre" id="btn-guardar-corte">
-                    <i class="fa-solid fa-lock"></i> Guardar y Cerrar Caja
+                    <i class="fa-solid fa-lock"></i> Guardar corte
                 </button>
                 <button type="button" class="btn btn-secundario" id="btn-imprimir">
                     <i class="fa-solid fa-print"></i> Imprimir Reporte
                 </button>
-                <button type="button" class="btn btn-secundario" id="btn-regresar" style="color: var(--texto-mutado);">
+                <button type="button" class="btn btn-secundario" id="btn-regresar" style="color: #888;">
                     <i class="fa-solid fa-arrow-left"></i> Volver al Menú
                 </button>
             </div>
@@ -138,73 +113,300 @@
 
     </main>
 
+    <div class="card-panel">
+        <h2 class="panel-title"><i class="fa-solid fa-magnifying-glass"></i> Consultar Cortes</h2>
+        <div class="form-inline" style="gap: 10px; align-items: flex-end;">
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Buscar por Fecha</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-search input-icon"></i>
+                    <input type="date" class="form-input" id="buscar-fecha-corte">
+                </div>
+            </div>
+            <button type="button" class="btn" id="btn-buscar-corte" style="background-color: #3498db; color: white; height: 40px; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer;">
+                <i class="fa-solid fa-search"></i> Consultar
+            </button>
+        </div>
+    </div>
+
     <script>
-        // Monto fijo esperado según los movimientos de la tabla de auditoría ($1000 + $250 + $300 - $150)
-        const EFECTIVO_ESPERADO = 1400.00;
+        const API_URL = '../PHP/api_corte.php';
+        let totalEstimadoSistema = 0;
+        let empleadoSesion = { nombre: "Gerente", rol: "Administrador" };
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Asignar fecha de hoy automáticamente
+            document.getElementById('btn-imprimir').addEventListener('click', generarPDFCorte);
             const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('corte-fecha').value = hoy;
+            const inputFecha = document.getElementById('input-fecha');
+            inputFecha.value = hoy;
+            document.getElementById('buscar-fecha-corte').value = hoy;
             
-            // Inicializar cálculos
-            calcularDiferencia(0);
-        });
-
-        // Escuchar cuando el usuario ingresa dinero contado en el input
-        document.getElementById('input-efectivo-real').addEventListener('input', (e) => {
-            const valorIngresado = parseFloat(e.target.value) || 0;
-            calcularDiferencia(valorIngresado);
-        });
-
-        // Función matemática para evaluar faltantes o sobrantes
-        function calcularDiferencia(valorReal) {
-            const diferencia = valorReal - EFECTIVO_ESPERADO;
+            cargarFlujoCaja(hoy);
             
-            // Actualizar etiquetas en el panel derecho
-            document.getElementById('val-real').innerText = `$${valorReal.toFixed(2)}`;
-            
-            const elementoDiferencia = document.getElementById('val-diferencia');
-            elementoDiferencia.innerText = `$${diferencia.toFixed(2)}`;
+            inputFecha.addEventListener('change', (e) => cargarFlujoCaja(e.target.value));
+            document.getElementById('input-efectivo').addEventListener('input', (e) => {
+                const valor = parseFloat(e.target.value) || 0;
+                document.getElementById('val-real').innerText = `$${valor.toFixed(2)}`;
+                calcularDiferencia();
+            });
 
-            // Cambiar colores dinámicamente según el estado del balance
-            if (diferencia === 0) {
-                elementoDiferencia.className = "estado-exito"; // Caja cuadra perfectamente
-            } else if (diferencia < 0) {
-                elementoDiferencia.className = "estado-alerta"; // Faltante (Rojo)
+            const sesion = sessionStorage.getItem('usuario_activo');
+            if (sesion) {
+                empleadoSesion = JSON.parse(sesion);
+                document.getElementById('txt-personal').innerText = `Personal: ${empleadoSesion.nombre} (${empleadoSesion.rol})`;
             } else {
-                elementoDiferencia.className = "estado-exito"; // Sobrante (Verde)
-                elementoDiferencia.innerText = `+$${diferencia.toFixed(2)}`;
+                // Si no hay sesión activa por alguna razón
+                document.getElementById('txt-personal').innerText = `${empleadoSesion.nombre} / ${empleadoSesion.rol}`;
+            }
+
+            document.getElementById('btn-guardar-corte').addEventListener('click', guardarCierreCaja);
+            document.getElementById('btn-buscar-corte').addEventListener('click', consultarCorteAnterior);
+            document.getElementById('btn-regresar').addEventListener('click', () => {
+                window.location.href = 'menu_gerente.html';
+            });
+        });
+
+        function cargarFlujoCaja(fechaSelect) {
+            fetch(`${API_URL}?fecha=${fechaSelect}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    totalEstimadoSistema = parseFloat(data.resumen.sistema_total) || 0;
+                    
+                    document.getElementById('txt-ingresos').innerText = `$${parseFloat(data.resumen.ingresos).toFixed(2)}`;
+                    document.getElementById('txt-egresos').innerText = `$${parseFloat(data.resumen.egresos).toFixed(2)}`;
+                    document.getElementById('txt-sistema').innerText = `$${totalEstimadoSistema.toFixed(2)}`;
+                    
+                    const tbody = document.getElementById('tabla-cuerpo');
+                    tbody.innerHTML = '';
+                    
+                    if (!data.movimientos || data.movimientos.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #888; padding: 20px;">No se registraron operaciones (Ventas o Envíos) en esta fecha.</td></tr>`;
+                    } else {
+                        data.movimientos.forEach(m => {
+                            const claseColor = m.tipo === 'Ingreso' ? 'texto-ingreso' : 'texto-egreso';
+                            const signo = m.tipo === 'Ingreso' ? '+' : '-';
+                            
+                            tbody.innerHTML += `<tr>
+                                <td>${m.hora}</td>
+                                <td><strong>${m.concepto}</strong></td>
+                                <td>${m.usuario}</td>
+                                <td><span class="badge-${m.tipo.toLowerCase()}">${m.tipo}</span></td>
+                                <td class="${claseColor}" style="font-weight:600;">${signo}$${parseFloat(m.monto).toFixed(2)}</td>
+                            </tr>`;
+                        });
+                    }
+                    calcularDiferencia();
+                } else {
+                    console.error("Error del servidor:", data.message);
+                }
+            })
+            .catch(err => console.error("Error de red al cargar movimientos:", err));
+        }
+
+        function calcularDiferencia() {
+            const fisico = parseFloat(document.getElementById('input-efectivo').value) || 0;
+            const dif = fisico - totalEstimadoSistema;
+            const txt = document.getElementById('txt-diferencia');
+            
+            txt.innerText = `$${dif.toFixed(2)}`;
+            
+            if (dif === 0) {
+                txt.style.color = 'orange';
+            } else if (dif < 0) {
+                txt.style.color = 'red';
+            } else {
+                txt.style.color = 'green';
             }
         }
 
-        // Navegación de regreso
-        document.getElementById('btn-regresar').addEventListener('click', () => {
-            window.location.href = 'menu_gerente.html'; // Nombre de tu archivo de menú anterior
-        });
-
-        // Acción de guardar
-        document.getElementById('btn-guardar-corte').addEventListener('click', () => {
-            const valorReal = parseFloat(document.getElementById('input-efectivo-real').value) || 0;
-            const dif = valorReal - EFECTIVO_ESPERADO;
-            
-            let mensaje = `Corte de caja guardado exitosamente.\nEfectivo Esperado: $${EFECTIVO_ESPERADO.toFixed(2)}\nEfectivo Real: $${valorReal.toFixed(2)}\n`;
-            
-            if(dif < 0) {
-                mensaje += `Atención: Se registró un faltante de $${Math.abs(dif).toFixed(2)}`;
-            } else if (dif > 0) {
-                mensaje += `Nota: Se registró un sobrante de $${dif.toFixed(2)}`;
-            } else {
-                mensaje += `¡Excelente! La caja cuadró perfectamente.`;
+        function guardarCierreCaja() {
+            const inputEfectivo = document.getElementById('input-efectivo');
+            if (!inputEfectivo || inputEfectivo.value.trim() === "") {
+                alert("Por favor, introduce primero la cantidad de dinero físico contado en la caja.");
+                return;
             }
 
-            alert(mensaje);
-            window.location.href = 'menu_gerente.html';
-        });
+            const fechaSelect = document.getElementById('input-fecha').value;
+            const efectivoReal = parseFloat(inputEfectivo.value) || 0;
+            const difCalculada = efectivoReal - totalEstimadoSistema;
 
-        document.getElementById('btn-imprimir').addEventListener('click', () => {
-            alert('Enviando reporte de auditoría a la ticketera...');
-        });
+            const formData = new URLSearchParams();
+            formData.append('fecha', fechaSelect);
+            formData.append('sistema_total', totalEstimadoSistema);
+            formData.append('efectivo_real', efectivoReal);
+            formData.append('diferencia', difCalculada);
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Error en la respuesta del servidor (Código " + res.status + ")");
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    inputEfectivo.value = '0';
+                    document.getElementById('val-real').innerText = "$0.00";
+                    cargarFlujoCaja(fechaSelect);
+                }
+            })
+            .catch(err => {
+                console.error("Detalle del error:", err);
+                alert("Ocurrió un error al intentar guardar el corte");
+            });
+        }
+
+        function consultarCorteAnterior() {
+            const fechaBusqueda = document.getElementById('buscar-fecha-corte').value;
+            if (!fechaBusqueda) {
+                alert("Por favor, seleccione una fecha válida para realizar la búsqueda.");
+                return;
+            }
+
+            fetch(`${API_URL}?fecha=${fechaBusqueda}&accion=buscar_corte`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.corte) {
+                    alert(`¡Corte Encontrado para la fecha ${fechaBusqueda}!\n\n` +
+                          `Efectivo Esperado (Sistema): $${parseFloat(data.corte.sistema_total).toFixed(2)}\n` +
+                          `Efectivo Real Reportado: $${parseFloat(data.corte.efectivo_real).toFixed(2)}\n` +
+                          `Diferencia Guardada: $${parseFloat(data.corte.diferencia).toFixed(2)}`);
+                    
+                    document.getElementById('input-fecha').value = fechaBusqueda;
+                    document.getElementById('input-efectivo').value = data.corte.efectivo_real;
+                    document.getElementById('val-real').innerText = `$${parseFloat(data.corte.efectivo_real).toFixed(2)}`;
+                    cargarFlujoCaja(fechaBusqueda);
+                } else {
+                    alert(data.message || "No se encontró ningún registro de corte definitivo cerrado para la fecha seleccionada.");
+                }
+            })
+            .catch(err => {
+                console.error("Error en la consulta del corte:", err);
+                alert("Error de conexión al buscar el corte en el servidor.");
+            });
+        }
+
+        function generarPDFCorte() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const fecha = document.getElementById('input-fecha').value || new Date().toISOString().split('T')[0];
+            const ingresos = document.getElementById('txt-ingresos').innerText;
+            const egresos = document.getElementById('txt-egresos').innerText;
+            const esperado = document.getElementById('txt-sistema').innerText;
+            const realContado = document.getElementById('val-real').innerText;
+            const diferencia = document.getElementById('txt-diferencia').innerText;
+
+            const nombreUsuarioPDF = empleadoSesion.nombre || "Gerente";
+            const rolUsuarioPDF = empleadoSesion.rol || "Administrador";
+
+            doc.setFont("Montserrat", "bold");
+            doc.setFontSize(20);
+            doc.setTextColor(44, 62, 80);
+            doc.text("GOLDEN CANTOR", 14, 20);
+            
+            doc.setFontSize(14);
+            doc.setFont("Montserrat", "normal");
+            doc.text("Reporte de Corte de Caja definitivo", 14, 28);
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 33, 196, 33);
+
+            doc.setFontSize(10);
+            doc.text(`Fecha del Reporte: ${fecha}`, 14, 40);
+            doc.text(`Generado por: ${nombreUsuarioPDF} (${rolUsuarioPDF})`, 14, 46);
+            doc.text(`Estado del Turno: Cerrado / Consultado`, 14, 52);
+
+            doc.setFontSize(12);
+            doc.setFont("Montserrat", "bold");
+            doc.text("RESUMEN DE BALANCE GENERAL", 14, 65);
+            
+            doc.setFontSize(11);
+            doc.setFont("Montserrat", "normal");
+            doc.text(`(+) Ingresos Totales (Ventas/Envíos):`, 14, 73);
+            doc.setFont("Montserrat", "bold"); doc.text(ingresos, 100, 73);
+            
+            doc.setFont("Montserrat", "normal");
+            doc.text(`(-) Egresos / Salidas de Efectivo:`, 14, 80);
+            doc.setFont("Montserrat", "bold"); doc.text(egresos, 100, 80);
+            
+            doc.line(14, 84, 130, 84); 
+
+            doc.setFont("Montserrat", "normal");
+            doc.text(`Efectivo Esperado en Sistema:`, 14, 90);
+            doc.setFont("Montserrat", "bold"); doc.text(esperado, 100, 90);
+            
+            doc.setFont("Montserrat", "normal");
+            doc.text(`Efectivo Real en Caja (Contado):`, 14, 97);
+            doc.setFont("Montserrat", "bold"); doc.text(realContado, 100, 97);
+            
+            doc.setFont("Montserrat", "normal");
+            doc.text(`DIFERENCIA RESULTANTE:`, 14, 105);
+            doc.setFont("Montserrat", "bold"); 
+            
+            if(diferencia.includes("-")) {
+                doc.setTextColor(192, 57, 43); 
+            } else if (diferencia === "$0.00") {
+                doc.setTextColor(230, 126, 34); 
+            } else {
+                doc.setTextColor(39, 174, 96); 
+            }
+            doc.text(diferencia, 100, 105);
+            doc.setTextColor(44, 62, 80); 
+
+            doc.setFontSize(12);
+            doc.setFont("Montserrat", "bold");
+            doc.text("FLUJO DE OPERACIONES DETALLADO (TURNO)", 14, 120);
+
+            const filasTabla = [];
+            const filasHTML = document.querySelectorAll("#tabla-cuerpo tr");
+            
+            filasHTML.forEach(fila => {
+                if(fila.cells.length >= 5) {
+                    const hora = fila.cells[0].innerText;
+                    const concepto = fila.cells[1].innerText;
+                    const usuario = fila.cells[2].innerText;
+                    const tipo = fila.cells[3].innerText;
+                    const monto = fila.cells[4].innerText;
+                    
+                    filasTabla.push([hora, concepto, usuario, tipo, monto]);
+                }
+            });
+
+            if (filasTabla.length === 0) {
+                doc.setFontSize(10);
+                doc.setFont("Montserrat", "normal");
+                doc.text("No se encontraron movimientos registrados en esta fecha para detallar.", 14, 128);
+            } else {
+                doc.autoTable({
+                    startY: 125,
+                    head: [['Hora', 'Concepto / Detalle', 'Usuario', 'Tipo', 'Monto']],
+                    body: filasTabla,
+                    headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255], fontStyle: 'bold' },
+                    styles: { font: "Montserrat", fontSize: 9 },
+                    columnStyles: {
+                        4: { halign: 'right', fontStyle: 'bold' }
+                    }
+                });
+            }
+
+            const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 30 : 150;
+            doc.line(20, finalY, 80, finalY);
+            doc.line(120, finalY, 180, finalY);
+            
+            doc.setFontSize(9);
+            doc.setFont("Montserrat", "normal");
+            doc.text(`Firma: ${nombreUsuarioPDF} (${rolUsuarioPDF})`, 32, finalY + 5);
+            doc.text("Firma Gerente de la Tienda ", 136, finalY + 5);
+
+            doc.save(`Corte_Caja_${fecha}_Golden_Cantor.pdf`);
+        }
     </script>
 </body>
 </html>

@@ -16,7 +16,7 @@
         </div>
         <div class="nav-user-info">
             <i class="fa-solid fa-user-shield"></i>
-            <span>Rol: Gerente</span>
+            <span id="txt-personal">Personal: Cargando...</span>
         </div>
     </header>
 
@@ -72,7 +72,7 @@
         </div>
 
         <div class="logout-wrapper">
-            <button class="btn-logout" onclick="navegarA('../HTML/iniciosesion.html')">
+            <button class="btn-logout" onclick="cerrarSesion()">
                 <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
             </button>
         </div>
@@ -80,6 +80,29 @@
     </main>
 
     <script>
+
+        const sesionJSON = sessionStorage.getItem('usuario_activo');
+        if (!sesionJSON) {
+            alert("Acceso denegado. Por favor, inicie sesión primero.");
+            window.location.href = '../HTML/iniciosesion.html';
+        }
+
+        const empleadoSesion = JSON.parse(sesionJSON);
+
+        if (empleadoSesion.rol.toLowerCase() !== 'gerente') {
+            alert("No tiene permisos de Gerente para acceder a este panel.");
+            sessionStorage.removeItem('usuario_activo'); 
+            window.location.href = '../HTML/iniciosesion.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const txtPersonal = document.getElementById('txt-personal');
+            if (txtPersonal) {
+
+                txtPersonal.innerText = `Personal: ${empleadoSesion.nombre} (${empleadoSesion.rol})`;
+            }
+        });
+
         function navegarA(pagina) {
             window.location.href = pagina;
         }
@@ -90,6 +113,11 @@
                 alert("Generando balance financiero... Desplegando desglose de operaciones.");
                 window.location.href = '../HTML/corte_caja.html';
             }
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('usuario_activo');
+            window.location.href = '../HTML/iniciosesion.html';
         }
     </script>
 </body>

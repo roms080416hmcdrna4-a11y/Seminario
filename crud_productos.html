@@ -6,7 +6,7 @@
     <title>Golden Cantor - Productos</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="../CSS/crud_productos.css">
+    <link rel="stylesheet" href="../CSS/crud_productos.css">
 </head>
 <body>
     <header class="navbar">
@@ -15,18 +15,15 @@
         </div>
         <div class="nav-user-info">
             <i class="fa-solid fa-user-shield"></i>
-            <span>Gerente de Tienda</span>
+            <span id="txt-rol-gerente">Gerente</span>
         </div>
     </header>
 
     <main class="crud-container">
-        
         <div class="card-panel">
             <h2 class="panel-title" id="form-titulo"><i class="fa-solid fa-box-open"></i> Registrar Nuevo Producto</h2>
-            
             <form id="form-producto">
                 <input type="hidden" id="edit-id" value="">
-
                 <div class="form-grid">
                     <div class="form-group" style="grid-column: span 2;">
                         <label class="form-label">Nombre del Producto</label>
@@ -35,7 +32,6 @@
                             <input type="text" class="form-input" id="prod-nombre" placeholder="Ej. Perfume Intenso Red" required>
                         </div>
                     </div>
-
                     <div class="form-group full-width-mobile">
                         <label class="form-label">Código / ID Único</label>
                         <div class="input-wrapper">
@@ -43,7 +39,6 @@
                             <input type="text" class="form-input" id="prod-codigo" placeholder="Ej. GC-001" required>
                         </div>
                     </div>
-
                     <div class="form-group full-width-mobile">
                         <label class="form-label">Categoría</label>
                         <div class="input-wrapper">
@@ -56,7 +51,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="form-group full-width-mobile">
                         <label class="form-label">Precio de Venta ($)</label>
                         <div class="input-wrapper">
@@ -64,15 +58,13 @@
                             <input type="number" class="form-input" id="prod-precio" placeholder="0.00" min="0" step="0.01" required>
                         </div>
                     </div>
-
                     <div class="form-group full-width-mobile">
-                        <label class="form-label">Stock / Existencias</label>
+                        <label class="form-label">Stock</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-layer-group input-icon"></i>
                             <input type="number" class="form-input" id="prod-stock" placeholder="Cantidad" min="0" required>
                         </div>
                     </div>
-
                     <div class="form-actions">
                         <button type="button" class="btn btn-secundario" id="btn-cancelar-edicion" style="display: none;">
                             <i class="fa-solid fa-ban"></i> Cancelar Edición
@@ -90,133 +82,148 @@
                 <h2 class="panel-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
                     <i class="fa-solid fa-boxes-stacked"></i> Inventario de Productos
                 </h2>
-                
                 <div class="input-wrapper search-wrapper">
                     <i class="fa-solid fa-magnifying-glass input-icon"></i>
                     <input type="text" class="form-input" id="input-buscar" placeholder="Buscar por nombre o código...">
                 </div>
             </div>
-<div class="table-container">
-    <table class="crud-tabla">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-            </tr>
-        </thead> <tbody id="tabla-productos-cuerpo">
-            </tbody>
-    </table> </div>
-            
+            <div class="table-container">
+                <table class="crud-tabla">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-productos-cuerpo"></tbody>
+                </table>
+            </div>
             <div style="margin-top: 25px; display: flex; justify-content: flex-start;">
                 <button type="button" class="btn btn-secundario" id="btn-volver-menu">
                     <i class="fa-solid fa-arrow-left"></i> Volver al Menú
                 </button>
             </div>
         </div>
-
     </main>
 
     <script>
-        // Catálogo local inicial (Simulación de base de datos)
-        let productos = [
-            { id: "1", codigo: "GC-101", nombre: "Perfume Golden Red 100ml", categoria: "Perfumes", precio: 250.00, stock: 15 },
-            { id: "2", codigo: "GC-102", nombre: "Loción Esencia de Noche", categoria: "Lociones", precio: 320.00, stock: 8 },
-            { id: "3", codigo: "GC-103", nombre: "Atomizador de Bolsillo", categoria: "Accesorios", precio: 45.00, stock: 50 }
-        ];
 
-        window.addEventListener('DOMContentLoaded', () => {
-            renderizarProductos(productos);
-        });
+        const sesionJSON = sessionStorage.getItem('usuario_activo');
+        if (!sesionJSON) {
+            alert("Acceso denegado. Por favor, inicie sesión primero.");
+            window.location.href = 'iniciosesion.html';
+        }
 
-        // Evento para Registrar o Editar un producto
-        document.getElementById('form-producto').addEventListener('submit', (e) => {
-            e.preventDefault();
+        const empleadoSesion = JSON.parse(sesionJSON);
 
-            const editId = document.getElementById('edit-id').value;
-            const codigo = document.getElementById('prod-codigo').value.trim();
-            const nombre = document.getElementById('prod-nombre').value.trim();
-            const categoria = document.getElementById('prod-categoria').value;
-            const precio = parseFloat(document.getElementById('prod-precio').value);
-            const stock = parseInt(document.getElementById('prod-stock').value);
+        if (empleadoSesion.rol.toLowerCase() !== 'gerente') {
+            alert("No tiene permisos de Gerente para acceder al catálogo.");
+            sessionStorage.removeItem('usuario_activo'); 
+            window.location.href = 'iniciosesion.html';
+        }
 
-            if (editId) {
-                // Modo EDICIÓN: Buscar el elemento y actualizarlo
-                productos = productos.map(p => p.id === editId ? { id: editId, codigo, nombre, categoria, precio, stock } : p);
-                alert('¡Producto actualizado correctamente!');
-                cancelarEdicion();
-            } else {
-                // Modo CREACIÓN: Añadir nuevo objeto al array
-                const nuevo = {
-                    id: Date.now().toString(),
-                    codigo,
-                    nombre,
-                    categoria,
-                    precio,
-                    stock
-                };
-                productos.push(nuevo);
-                alert('¡Producto guardado exitosamente!');
+        document.addEventListener('DOMContentLoaded', () => {
+            const txtRol = document.getElementById('txt-rol-gerente');
+            if (txtRol) {
+                txtRol.innerText = `Personal: ${empleadoSesion.nombre} (${empleadoSesion.rol})`;
             }
-
-            document.getElementById('form-producto').reset();
-            renderizarProductos(productos);
         });
 
-        // Dibuja las filas en la tabla según el estado del array
-        function renderizarProductos(lista) {
-            const cuerpo = document.getElementById('tabla-productos-cuerpo');
-            cuerpo.innerHTML = '';
+        const API_URL = '../PHP/api_productos.php';
 
-            if (lista.length === 0) {
-                cuerpo.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--texto-mutado);">No se encontraron productos coincidentes</td></tr>`;
+        window.addEventListener('DOMContentLoaded', cargarProductosBaseDatos);
+
+        function cargarProductosBaseDatos() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(productos => { renderizarProductos(productos); })
+                .catch(err => console.error("Error cargando inventario:", err));
+        }
+
+        function renderizarProductos(productos) {
+            const tbody = document.getElementById('tabla-productos-cuerpo');
+            tbody.innerHTML = '';
+            if (productos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay productos registrados.</td></tr>`;
                 return;
             }
-
-            lista.forEach(p => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td style="font-weight: 600; color: var(--rojo-primario);">${p.codigo}</td>
+            productos.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${p.codigo}</strong></td>
                     <td>${p.nombre}</td>
-                    <td>${p.categoria}</td>
-                    <td>$${p.precio.toFixed(2)}</td>
-                    <td>${p.stock} pzas</td>
+                    <td><span class="badge">${p.categoria}</span></td>
+                    <td>$${parseFloat(p.precio).toFixed(2)}</td>
+                    <td>${p.stock} u.</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn-table btn-edit" onclick="cargarEdicion('${p.id}')" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button class="btn-table btn-delete" onclick="eliminarProducto('${p.id}')" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </td>
-                `;
-                cuerpo.appendChild(fila);
+                        <button class="btn btn-editar" onclick="cargarEdicion(${p.id})" style="padding: 5px 10px; margin-right: 5px; background-color: #f39c12; color:white; border:none; cursor:pointer; border-radius:4px;"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-eliminar" onclick="eliminarProducto(${p.id})" style="padding: 5px 10px; background-color: #e74c3c; color:white; border:none; cursor:pointer; border-radius:4px;"><i class="fa-solid fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(tr);
             });
         }
 
-        // Carga los datos de la fila seleccionada de vuelta en los inputs para editar
+        document.getElementById('form-producto').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const payload = {
+                id: document.getElementById('edit-id').value,
+                codigo: document.getElementById('prod-codigo').value.trim(),
+                nombre: document.getElementById('prod-nombre').value.trim(),
+                categoria: document.getElementById('prod-categoria').value,
+                precio: parseFloat(document.getElementById('prod-precio').value),
+                stock: parseInt(document.getElementById('prod-stock').value)
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                cancelarEdicion();
+                cargarProductosBaseDatos();
+            })
+            .catch(err => console.error("Error al guardar:", err));
+        });
+
         function cargarEdicion(id) {
-            const p = productos.find(prod => prod.id === id);
-            if (!p) return;
-
-            document.getElementById('edit-id').value = p.id;
-            document.getElementById('prod-codigo').value = p.codigo;
-            document.getElementById('prod-nombre').value = p.nombre;
-            document.getElementById('prod-categoria').value = p.categoria;
-            document.getElementById('prod-precio').value = p.precio;
-            document.getElementById('prod-stock').value = p.stock;
-
-            // Modificar textos de la interfaz para avisar el cambio de modo
-            document.getElementById('form-titulo').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modificando Producto: ${p.codigo}`;
-            document.getElementById('btn-guardar').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Actualizar Cambios`;
-            document.getElementById('btn-cancelar-edicion').style.display = 'inline-flex';
-            
-            // Hacer scroll suave hacia arriba para que el usuario note el formulario listo
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            fetch(`${API_URL}?id=${id}`)
+                .then(res => res.json())
+                .then(p => {
+                    document.getElementById('edit-id').value = p.id;
+                    document.getElementById('prod-codigo').value = p.codigo;
+                    document.getElementById('prod-nombre').value = p.nombre;
+                    document.getElementById('prod-categoria').value = p.categoria;
+                    document.getElementById('prod-precio').value = p.precio;
+                    document.getElementById('prod-stock').value = p.stock;
+                    document.getElementById('form-titulo').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modificando: ${p.codigo}`;
+                    document.getElementById('btn-guardar').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Actualizar en Base de Datos`;
+                    document.getElementById('btn-cancelar-edicion').style.display = 'inline-flex';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
         }
 
-        // Abandona el modo de edición y regresa al estado limpio
+        function eliminarProducto(id) {
+            if (confirm('¿Deseas borrar este producto?')) {
+                fetch(API_URL, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    cargarProductosBaseDatos();
+                });
+            }
+        }
+
         function cancelarEdicion() {
             document.getElementById('form-producto').reset();
             document.getElementById('edit-id').value = '';
@@ -225,28 +232,16 @@
             document.getElementById('btn-cancelar-edicion').style.display = 'none';
         }
 
-        // Listener del botón para cancelar edición manualmente
         document.getElementById('btn-cancelar-edicion').addEventListener('click', cancelarEdicion);
 
-        // Elimina de forma definitiva un elemento del inventario
-        function eliminarProducto(id) {
-            if (confirm('¿Estás seguro de que deseas eliminar este artículo de forma permanente?')) {
-                productos = productos.filter(p => p.id !== id);
-                renderizarProductos(productos);
-            }
-        }
-
-        // Buscador interactivo por texto (Nombre o Código)
         document.getElementById('input-buscar').addEventListener('input', (e) => {
-            const texto = e.target.value.toLowerCase().trim();
-            const filtrados = productos.filter(p => 
-                p.nombre.toLowerCase().includes(texto) || 
-                p.codigo.toLowerCase().includes(texto)
-            );
-            renderizarProductos(filtrados);
+            const termino = e.target.value.toLowerCase();
+            const filas = document.querySelectorAll('#tabla-productos-cuerpo tr');
+            filas.forEach(f => {
+                f.style.display = f.textContent.toLowerCase().includes(termino) ? '' : 'none';
+            });
         });
 
-        // Botón de retorno al panel administrativo anterior
         document.getElementById('btn-volver-menu').addEventListener('click', () => {
             window.location.href = 'menu_gerente.html';
         });

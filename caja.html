@@ -32,7 +32,7 @@
                         <label class="form-label">Producto / ID</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-barcode input-icon"></i>
-                            <input type="text" class="form-input" id="input-producto" placeholder="Escribe ID o nombre..." required>
+                            <input type="text" class="form-input" id="input-producto" placeholder="Escribe el Codigo o nombre del producto" required>
                         </div>
                     </div>
 
@@ -108,111 +108,139 @@
                     <i class="fa-solid fa-truck-fast"></i> Solicitar Envío
                 </button>
                 <button type="button" class="btn btn-secundario" id="btn-regresar" style="color: var(--texto-mutado);">
-                    <i class="fa-solid fa-arrow-left"></i> Salir / Regresar
+                    <i class="fa-solid fa-arrow-left"></i> Salir y Cerrar sesion 
                 </button>
             </div>
         </div>
     </main>
 
     <script>
-        let carrito = [];
-        const PRECIO_BASE_SIMULADO = 300.00; 
+let carrito = [];
+let empleadoSesion = { nombre: "Vendedor" };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('input-fecha').value = hoy;
-            
-            renderizarTabla();
-        });
+window.addEventListener('DOMContentLoaded', () => {
 
-        document.getElementById('form-caja').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const nombreProducto = document.getElementById('input-producto').value.trim();
-            const cantidadProducto = parseInt(document.getElementById('input-cantidad').value);
+    const sesion = sessionStorage.getItem('usuario_activo');
+    if (sesion) {
+        empleadoSesion = JSON.parse(sesion);
+        document.getElementById('txt-personal').innerText = `Personal: ${empleadoSesion.nombre} (${empleadoSesion.rol})`;
+    }
 
-            if (nombreProducto === "" || cantidadProducto <= 0) return;
+    document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
+    renderizarTabla();
+});
 
- 
-            const nuevoItem = {
-                id: Date.now(), 
-                nombre: nombreProducto,
-                cantidad: cantidadProducto,
-                precioUnitario: PRECIO_BASE_SIMULADO,
-                subtotal: cantidadProducto * PRECIO_BASE_SIMULADO
-            };
 
-            carrito.push(nuevoItem);
+document.getElementById('form-caja').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const busqueda = document.getElementById('input-producto').value.trim();
+    const cantidad = parseInt(document.getElementById('input-cantidad').value) || 1;
 
-            // Limpiamos los inputs del formulario para el siguiente registro
-            document.getElementById('input-producto').value = '';
-            document.getElementById('input-cantidad').value = '1';
+    if (!busqueda) return;
 
-            // Actualizamos la interfaz
-            renderizarTabla();
-        });
-
-        // Función encargada de dibujar las filas en la tabla y actualizar importes
-        function renderizarTabla() {
-            const tablaCuerpo = document.getElementById('tabla-cuerpo');
-            tablaCuerpo.innerHTML = ''; // Limpiamos la tabla antigua
-
-            let cuentaSubtotal = 0;
-
-            if (carrito.length === 0) {
-                tablaCuerpo.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--texto-mutado);">No hay productos en la venta actual</td></tr>`;
-            } else {
-                carrito.forEach(item => {
-                    cuentaSubtotal += item.subtotal;
-
-                    // Creamos la estructura HTML de la fila
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${item.nombre}</td>
-                        <td>${item.cantidad}</td>
-                        <td>$${item.precioUnitario.toFixed(2)}</td>
-                        <td>$${item.subtotal.toFixed(2)}</td>
-                        <td>
-                            <button class="btn-delete" onclick="eliminarProducto(${item.id})">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    `;
-                    tablaCuerpo.appendChild(fila);
-                });
-            }
-
-            // Cálculos finales comerciales
-            const totalFinal = cuentaSubtotal;
-
-            // Pintar los valores actualizados en el panel derecho
-            document.getElementById('txt-subtotal').innerText = `$${cuentaSubtotal.toFixed(2)}`;
-            document.getElementById('txt-total').innerText = `$${totalFinal.toFixed(2)}`;
-        }
-
-        // Función para remover un producto si el vendedor se equivoca
-        function eliminarProducto(id) {
-            carrito = carrito.filter(item => item.id !== id);
-            renderizarTabla();
-        }
-
-        // Botón de salida / regresar
-        document.getElementById('btn-regresar').addEventListener('click', () => {
-            window.location.href = '../HTML/iniciosesion.html'; 
-        });
-    document.getElementById('btn-envio').addEventListener('click', () => {
-            window.location.href = '../HTML/envio.html'; 
-        });
-        // Botón finalizar compra
-        document.getElementById('btn-finalizar').addEventListener('click', () => {
-            if (carrito.length === 0) {
-                alert('La tabla está vacía. Añade productos antes de cobrar.');
+    fetch(`../PHP/api_caja.php?buscar=${encodeURIComponent(busqueda)}`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const prod = data.producto;
+            if (prod.stock < cantidad) {
+                alert(`Stock insuficiente. Solo quedan: ${prod.stock} piezas.`);
                 return;
             }
-            alert('¡Venta procesada con éxito! La cuenta ha sido cerrada.');
-            carrito = []; // Limpiamos la caja para la siguiente venta
+
+            const index = carrito.findIndex(item => item.id_db === prod.id);
+            if (index !== -1) {
+                if(carrito[index].cantidad + cantidad > prod.stock){
+                    alert("No puedes agregar más de las existencias reales.");
+                    return;
+                }
+                carrito[index].cantidad += cantidad;
+                carrito[index].subtotal = carrito[index].cantidad * carrito[index].precioUnitario;
+            } else {
+                carrito.push({
+                    id: Date.now(),
+                    id_db: prod.id,
+                    nombre: `[${prod.codigo}] ${prod.nombre}`,
+                    cantidad: cantidad,
+                    precioUnitario: parseFloat(prod.precio),
+                    subtotal: cantidad * parseFloat(prod.precio)
+                });
+            }
+            document.getElementById('input-producto').value = '';
             renderizarTabla();
+        } else {
+            alert(data.message);
+        }
+    });
+});
+
+function renderizarTabla() {
+    const tbody = document.getElementById('tabla-cuerpo');
+    tbody.innerHTML = '';
+    let total = 0;
+
+    if (carrito.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">La tabla está vacía.</td></tr>`;
+    } else {
+        carrito.forEach(item => {
+            total += item.subtotal;
+            tbody.innerHTML += `<tr>
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td>$${item.precioUnitario.toFixed(2)}</td>
+                <td>$${item.subtotal.toFixed(2)}</td>
+                <td><button class="btn-delete" onclick="eliminarProducto(${item.id})"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>`;
         });
+    }
+    document.getElementById('txt-subtotal').innerText = `$${total.toFixed(2)}`;
+    document.getElementById('txt-total').innerText = `$${total.toFixed(2)}`;
+}
+
+function eliminarProducto(id) {
+    carrito = carrito.filter(item => item.id !== id);
+    renderizarTabla();
+}
+
+document.getElementById('btn-finalizar').addEventListener('click', () => {
+    if (carrito.length === 0) return alert('La tabla está vacía.');
+
+    const totalFinal = carrito.reduce((sum, item) => sum + item.subtotal, 0);
+    const payload = {
+        productos: carrito,
+        total: totalFinal,
+        fecha: document.getElementById('input-fecha').value,
+        vendedor: empleadoSesion.nombre
+    };
+
+    fetch('../PHP/api_caja.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.status === 'success') {
+            carrito = [];
+            renderizarTabla();
+        }
+    });
+});
+
+document.getElementById('btn-envio').addEventListener('click', () => {
+    if (carrito.length === 0) return alert('Por favor, añade primero productos.');
+    
+    sessionStorage.setItem('carrito_envio', JSON.stringify({
+        productos: carrito,
+        total: carrito.reduce((sum, item) => sum + item.subtotal, 0)
+    }));
+    window.location.href = 'envio.html';
+});
+
+document.getElementById('btn-regresar').addEventListener('click', () => {
+    window.location.href = 'iniciosesion.html';
+});
     </script>
 </body>
 </html>
