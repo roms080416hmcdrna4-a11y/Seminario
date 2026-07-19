@@ -1,2 +1,2 @@
-Esto es una base de datos estetica, aun no contiene bases de datos 
+Esto es el programa estetico, aun no contiene bases de datos 
 postata.... ya no quiero ir los sabados....
